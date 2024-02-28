@@ -1,0 +1,101 @@
+import streamlit as st
+import requests
+import google.generativeai as genai
+
+# Initial configuration for Gemini
+genai.configure(api_key="AIzaSyCA4__JMC_ZIQ9xQegIj5LOMLhSSrn3pMw")
+
+generation_config = {
+    "temperature": 0.9,
+    "top_p": 1,
+    "top_k": 40,
+    "max_output_tokens": 2048,
+}
+
+safety_settings = [
+    {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
+    {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
+    {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
+    {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
+]
+
+model = genai.GenerativeModel(model_name="gemini-1.0-pro",
+                              generation_config=generation_config,
+                              safety_settings=safety_settings)
+
+def fetch_news(keywords, page=1, pageSize=10):
+    API_KEY = '0dfea93e0b074c5c9efa798afb71e6ef'  # Use your actual API key
+    BASE_URL = 'https://newsapi.org/v2/everything'
+    all_articles = []
+    for keyword in keywords:
+        params = {
+            'q': keyword,
+            'page': page,
+            'pageSize': pageSize,
+            'apiKey': API_KEY,
+        }
+        response = requests.get(BASE_URL, params=params)
+        if response.status_code == 200:
+            articles = response.json().get('articles', [])
+            all_articles.extend(articles)
+    return all_articles
+
+def analyze_user_interest(user_responses):
+    # Construct the prompt from user responses
+    prompt_parts = ["Analyzing user interest based on the following news interactions:\n"]
+    for response in user_responses:
+        prompt_parts.append(f"Title: {response['title']}, Response: {response['response']}\n")
+    prompt_parts.append("\nList the user's interested topics numerically as follows:\n1. Topic Name\n2. Topic Name\n...")
+
+    response = model.generate_content("".join(prompt_parts))
+    # Assuming the response is a structured text in the desired format
+    return response.text
+
+
+def manage_and_display_news_with_feedback(keywords, session_state_key):
+    if session_state_key not in st.session_state:
+        st.session_state[session_state_key] = {
+            'page': 1,
+            'user_responses': [],
+            'articles_to_display': fetch_news(keywords),
+        }
+
+    state = st.session_state[session_state_key]
+
+    for idx, article in enumerate(state['articles_to_display']):
+        with st.container():
+            st.image(article.get('urlToImage', 'https://via.placeholder.com/150'), width=150)
+            st.write(f"### {article['title']}")
+            st.write(article['description'])
+            col1, col2 = st.columns([1, 1])
+            with col1:
+                like = st.button("👍 Like", key=f"like_{idx}")
+            with col2:
+                dislike = st.button("👎 Dislike", key=f"dislike_{idx}")
+            
+            if like:
+                state['user_responses'].append({'title': article['title'], 'response': 'like'})
+            if dislike:
+                state['user_responses'].append({'title': article['title'], 'response': 'dislike'})
+
+    if st.button("Generate More", key='generate_more'):
+        state['page'] += 1
+        more_articles = fetch_news(keywords, page=state['page'])
+        state['articles_to_display'].extend(more_articles)
+
+    if st.button("Generate My Interest", key='generate_interest'):
+        user_interest_analysis = analyze_user_interest(state['user_responses'])
+        st.write("Analysis of User's Interests:")
+        st.write(user_interest_analysis)
+
+def app():
+    st.title("News Recommendation Engine")
+
+    topics = ["Education", "Food", "Travel", "Health", "Science", "Business", "Entertainment", "Sports", "Tech", "Politics"]
+    user_topics = st.multiselect("Select Topics of Interest", topics)
+
+    if user_topics:
+        manage_and_display_news_with_feedback(user_topics, 'user_feedback')
+
+if __name__ == "__main__":
+    app()
