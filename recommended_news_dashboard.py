@@ -63,7 +63,7 @@ def app():
     st.title("Recommended News Dashboard")
 
     # Replace 'YOUR_API_KEY_HERE' with your actual NewsAPI key
-    API_KEY = '0dfea93e0b074c5c9efa798afb71e6ef'
+    API_KEY = 'api'
 
     if 'predicted_interests' in st.session_state:
         interests = st.session_state['predicted_interests']
