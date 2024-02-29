@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 import random
 
-API_KEY = '849436492be140a7917b86738816ae95'  # Replace with your actual NewsAPI key
+API_KEY = 'api'  # Replace with your actual NewsAPI key
 
 def fetch_news_across_categories(pageSize=5):
     BASE_URL = 'https://newsapi.org/v2/top-headlines'
