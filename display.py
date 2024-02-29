@@ -3,7 +3,7 @@ import streamlit as st
 import google.generativeai as genai
 
 # Assume the API key is set properly in your environment
-genai.configure(api_key="AIzaSyCA4__JMC_ZIQ9xQegIj5LOMLhSSrn3pMw")
+genai.configure(api_key="api")
 
 generation_config = {
     "temperature": 0.9,
