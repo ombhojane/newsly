@@ -81,7 +81,7 @@ def app():
 
     # Sidebar for user input
     region = st.sidebar.text_input("Enter your country code", value='in').lower()
-    API_KEY = "690782566c704f90bc1827be4976e3c6"  # Use your actual NewsAPI key
+    API_KEY = "api"  # Use your actual NewsAPI key
     search_query = st.sidebar.text_input("Search for news")
 
     # Fetch and display news based on the user's input
