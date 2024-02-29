@@ -8,7 +8,7 @@ from tools.scraper_tools import ScraperTool
 from langchain.chat_models import ChatOpenAI
 
 # Assuming OPENAI_API_KEY is already set in your environment for simplicity
-os.environ["OPENAI_API_KEY"] = "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"
+os.environ["OPENAI_API_KEY"] = "api"
 
 scrape_tool = ScraperTool().scrape
 llm = ChatOpenAI(model='gpt-3.5-turbo')
